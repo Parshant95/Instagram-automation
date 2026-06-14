@@ -1,0 +1,9 @@
+{
+  "priority_categories": [
+    "Cars & Motorcycles",
+    "Anime"
+  ],
+  "max_pages_per_category": null,
+  "delay_seconds": 1.5,
+  "download_dir": "downloads"
+}
