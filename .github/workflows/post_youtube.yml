@@ -1,0 +1,51 @@
+name: Post YouTube Short
+
+on:
+  schedule:
+    - cron: '30 6 * * *'   # 12:00 PM IST (UTC+5:30)
+    - cron: '30 14 * * *'  # 8:00 PM IST (UTC+5:30)
+  workflow_dispatch:        # allows manual trigger from GitHub UI
+
+permissions:
+  contents: write
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Restore YouTube config
+        if: ${{ secrets.YT_CONFIG_JSON != '' }}
+        shell: bash
+        env:
+          YT_CONFIG_JSON: ${{ secrets.YT_CONFIG_JSON }}
+        run: printf '%s' "$YT_CONFIG_JSON" > youtube_config.json
+
+      - name: Post YouTube Short
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          YT_PRIVACY: public
+        run: python youtube_poster.py
+
+      - name: Commit state changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add posted_youtube.json music_state.json || true
+          git diff --staged --quiet || git commit -m "chore: posted youtube short [skip ci]"
+          git push

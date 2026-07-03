@@ -1,22 +1,26 @@
 {
     "uuids": {
-        "phone_id": "a38ee669-bd3e-48ff-922f-3c97fcc7bc0a",
-        "uuid": "2eb44ad9-44de-42c0-a0ca-5626ed825bb8",
-        "client_session_id": "1868da70-63ee-4161-89b2-01fd5350c8ea",
-        "advertising_id": "df3f2ed6-fb0c-42ba-86c4-c1325ee16ff7",
-        "android_device_id": "android-aa4ca66e82236101",
-        "request_id": "96b1792b-3c9f-45a4-81c7-ad0a64e46009",
-        "tray_session_id": "6a190d3c-8a92-475a-84de-16ce42a6085c"
+        "phone_id": "c08598cc-6053-42c8-a1d2-1f73f8fa724b",
+        "uuid": "39dca77b-5fd1-432d-829f-c6712755e053",
+        "client_session_id": "73abc488-64c1-4a7b-b1b2-c4b75d72dd08",
+        "advertising_id": "78f332eb-e237-4bc8-ba10-ab5071d0a2a1",
+        "android_device_id": "android-3b43b37b30493f9a",
+        "request_id": "fae46790-adb4-47f0-91d9-9702a29a815b",
+        "tray_session_id": "9be04383-f50f-40dc-a0ad-df586c8c8f28"
     },
-    "mid": "ai0QYwABAAEocGok2TlCEQ_ct2ll",
+    "mid": null,
     "ig_u_rur": null,
     "ig_www_claim": null,
     "authorization_data": {
         "ds_user_id": "53923936247",
-        "sessionid": "53923936247%3AGdVE4qWFVu8IQu%3A17%3AAYj8iYVp8yYc51mK6AyCDKU8U_1qM1jnknb1CIA7ng"
+        "sessionid": "53923936247%3A7Tc2lZ6gvc72Pg%3A11%3AAYgca-vtYVdnFDHDnSkPXCVx8ljfIpPTx49oBLsU1w",
+        "should_use_header_over_cookies": true
     },
-    "cookies": {},
-    "last_login": 1781338255.7483504,
+    "cookies": {
+        "sessionid": "53923936247%3A7Tc2lZ6gvc72Pg%3A11%3AAYgca-vtYVdnFDHDnSkPXCVx8ljfIpPTx49oBLsU1w",
+        "ds_user_id": "53923936247"
+    },
+    "last_login": null,
     "device_settings": {
         "android_version": 34,
         "android_release": "14",

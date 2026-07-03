@@ -1,0 +1,102 @@
+[~] No new videos to post to YouTube this slot.
+[*] Authenticating with YouTube...
+[*] Ready.
+
+[!] Failed to upload: [WinError 32] The process cannot access the file because it is being used by another process: 'temp\\XsbZyDtz0W-MakiOzeFireForceLiveWallpaper_short.mp4'
+Traceback (most recent call last):
+  File "C:\Users\parsh\Documents\ProjectX\Automation\youtube_poster.py", line 274, in run
+    short = prepare_short(vid)
+            ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\parsh\Documents\ProjectX\Automation\youtube_poster.py", line 180, in prepare_short
+    out.unlink()
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\pathlib.py", line 1342, in unlink
+    os.unlink(self)
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'temp\\XsbZyDtz0W-MakiOzeFireForceLiveWallpaper_short.mp4'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\parsh\Documents\ProjectX\Automation\youtube_poster.py", line 278, in run
+    sys.exit(1)
+SystemExit: 1
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\parsh\Documents\ProjectX\Automation\youtube_poster.py", line 285, in <module>
+    run()
+  File "C:\Users\parsh\Documents\ProjectX\Automation\youtube_poster.py", line 281, in run
+    tmp.unlink(missing_ok=True)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\pathlib.py", line 1342, in unlink
+    os.unlink(self)
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'temp\\XsbZyDtz0W-MakiOzeFireForceLiveWallpaper_short.mp4'
+[~] No new videos to post to YouTube this slot.
+^C[~] No new videos to post to YouTube this slot.
+[*] Authenticating with YouTube...
+[*] Ready.
+
+[*] Music [4/4]: track4.mp3
+[*] Cropping to 9:16 + mixing music: XtwN1hSEqc-Porsche911Gt3RsFh6LiveWallpaper.mp4
+[*] Ready: XtwN1hSEqc-Porsche911Gt3RsFh6LiveWallpaper_short.mp4
+[*] Uploading: XtwN1hSEqc-Porsche911Gt3RsFh6LiveWallpaper_short.mp4  (as public)
+[!] Failed to upload: ('disabled_client: The OAuth client was disabled.', {'error': 'disabled_client', 'error_description': 'The OAuth client was disabled.'})
+Traceback (most recent call last):
+  File "C:\Users\parsh\Documents\ProjectX\Automation\youtube_poster.py", line 275, in run
+    upload_video(youtube, short, original_name=vid.name, category=vid.parent.name)
+  File "C:\Users\parsh\Documents\ProjectX\Automation\youtube_poster.py", line 251, in upload_video
+    status, response = request.next_chunk()
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\parsh\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\googleapiclient\_helpers.py", line 130, in positional_wrapper
+    return wrapped(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\parsh\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\googleapiclient\http.py", line 1007, in next_chunk
+    resp, content = _retry_request(
+                    ^^^^^^^^^^^^^^^
+  File "C:\Users\parsh\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\googleapiclient\http.py", line 191, in _retry_request
+    resp, content = http.request(uri, method, *args, **kwargs)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\parsh\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\google_auth_httplib2.py", line 209, in request
+    self.credentials.before_request(self._request, method, uri, request_headers)
+  File "C:\Users\parsh\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\google\auth\credentials.py", line 228, in before_request
+    self._blocking_refresh(request)
+  File "C:\Users\parsh\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\google\auth\credentials.py", line 191, in _blocking_refresh
+    self.refresh(request)
+  File "C:\Users\parsh\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\google\oauth2\credentials.py", line 409, in refresh
+    ) = reauth.refresh_grant(
+        ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\parsh\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\google\oauth2\reauth.py", line 366, in refresh_grant
+    _client._handle_error_response(response_data, retryable_error)
+  File "C:\Users\parsh\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\google\oauth2\_client.py", line 69, in _handle_error_response
+    raise exceptions.RefreshError(
+google.auth.exceptions.RefreshError: ('disabled_client: The OAuth client was disabled.', {'error': 'disabled_client', 'error_description': 'The OAuth client was disabled.'})
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\parsh\Documents\ProjectX\Automation\youtube_poster.py", line 278, in run
+    sys.exit(1)
+SystemExit: 1
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\parsh\Documents\ProjectX\Automation\youtube_poster.py", line 285, in <module>
+    run()
+  File "C:\Users\parsh\Documents\ProjectX\Automation\youtube_poster.py", line 281, in run
+    tmp.unlink(missing_ok=True)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\pathlib.py", line 1342, in unlink
+    os.unlink(self)
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'temp\\XtwN1hSEqc-Porsche911Gt3RsFh6LiveWallpaper_short.mp4'
+^C^C^C^C[~] No new videos to post to YouTube this slot.
+^C[*] Authenticating with YouTube...
+[*] Ready.
+
+[*] Music [4/5]: track4.mp3
+[*] Cropping to 9:16 + mixing music: oTvD6xUsyC-FuukaYamagishi-Persona3ReloadLiveWallpaper.mp4
+[*] Ready: oTvD6xUsyC-FuukaYamagishi-Persona3ReloadLiveWallpaper_short.mp4
+[*] Uploading: oTvD6xUsyC-FuukaYamagishi-Persona3ReloadLiveWallpaper_short.mp4  (as public)
+[+] Posted! https://www.youtube.com/shorts/QGUT4S3IjGg
+^C[~] No new videos to post to YouTube this slot.
+[~] No new videos to post to YouTube this slot.
+[~] No new videos to post to YouTube this slot.
+[~] No new videos to post to YouTube this slot.
