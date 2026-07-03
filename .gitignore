@@ -1,8 +1,12 @@
 config.json
+youtube_config.json
+client_secret.json
+session.json
 temp/
 downloads/
 __pycache__/
 *.pyc
 *.pyo
 .env
+*.mp4
 daily_state.json
