@@ -31,7 +31,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Restore Instagram session
-        if: ${{ secrets.IG_SESSION_JSON != '' }}
+        if: ${{ env.IG_SESSION_JSON != '' }}
         shell: bash
         env:
           IG_SESSION_JSON: ${{ secrets.IG_SESSION_JSON }}
