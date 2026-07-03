@@ -30,6 +30,13 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
+      - name: Restore Instagram session
+        if: ${{ secrets.IG_SESSION_JSON != '' }}
+        shell: bash
+        env:
+          IG_SESSION_JSON: ${{ secrets.IG_SESSION_JSON }}
+        run: printf '%s' "$IG_SESSION_JSON" > session.json
+
       - name: Post video
         env:
           IG_USERNAME: ${{ secrets.IG_USERNAME }}

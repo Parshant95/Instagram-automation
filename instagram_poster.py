@@ -18,6 +18,7 @@ Folder flow:
 import json
 import os
 import shutil
+import socket
 import sys
 import time
 from pathlib import Path
@@ -28,6 +29,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 
 CONFIG_FILE = "config.json"
 PENDING_DIR = Path("posts/pending")
+DOWNLOADS_DIR = Path("downloads")
 DONE_DIR    = Path("posts/done")
 MUSIC_DIR   = Path("music")
 MUSIC_STATE = Path("music_state.json")
@@ -38,9 +40,28 @@ VIDEO_EXTS = {".mp4", ".mov", ".webm", ".mkv"}
 MUSIC_EXTS = {".mp3", ".wav", ".aac", ".m4a"}
 
 
+# ── Network readiness ───────────────────────────────────────────────────────
+
+def wait_for_network(host: str = "i.instagram.com", retries: int = 10, delay: int = 30) -> bool:
+    """Block until DNS resolves for `host`, or give up after `retries` attempts.
+
+    Guards against transient DNS/connectivity failures (e.g. when a scheduled
+    run fires before the network is up after boot/wake).
+    """
+    for attempt in range(1, retries + 1):
+        try:
+            socket.getaddrinfo(host, 443)
+            return True
+        except socket.gaierror:
+            print(f"[!] Network not ready (attempt {attempt}/{retries}), "
+                  f"retrying in {delay}s...")
+            time.sleep(delay)
+    return False
+
+
 # ── Credentials ───────────────────────────────────────────────────────────────
 
-def get_credentials() -> tuple[str, str]:
+def get_credentials() -> tuple[str | None, str | None]:
     username = os.environ.get("IG_USERNAME")
     password = os.environ.get("IG_PASSWORD")
     if username and password:
@@ -49,10 +70,7 @@ def get_credentials() -> tuple[str, str]:
         with open(CONFIG_FILE, encoding="utf-8") as f:
             cfg = json.load(f)
         return cfg["username"], cfg["password"]
-    raise RuntimeError(
-        "No credentials found. Set IG_USERNAME and IG_PASSWORD env vars, "
-        "or provide a local config.json."
-    )
+    return None, None
 
 
 # ── Posted-video log ──────────────────────────────────────────────────────────
@@ -85,21 +103,64 @@ def get_ffmpeg() -> str:
 
 # ── Login ─────────────────────────────────────────────────────────────────────
 
-def login(username: str, password: str):
+def login(username: str | None, password: str | None):
     from instagrapi import Client
     cl = Client()
     session_file = Path("session.json")
+
+    # Keep the same device fingerprint across re-logins. Inventing a new
+    # device/UUID on every fresh login is what makes Instagram fire a
+    # "new device" challenge_required checkpoint.
+    device_settings = None
+
     if session_file.exists():
         try:
             cl.load_settings(session_file)
-            cl.login(username, password)
+            device_settings = cl.get_settings()
+            # A session built via login_by_sessionid already carries valid
+            # authorization_data — do NOT call cl.login(user, pass) here, as
+            # that hits the login API and re-triggers the challenge checkpoint.
+            # Validate with a lightweight authenticated request instead.
+            cl.account_info()
             cl.dump_settings(session_file)
             print("[*] Logged in via saved session.")
             return cl
-        except Exception:
-            print("[!] Session expired — logging in fresh...")
-            session_file.unlink(missing_ok=True)
-    cl.login(username, password)
+        except Exception as e:
+            # Do NOT delete session.json here. A transient 403/rate-limit
+            # would otherwise destroy a perfectly good session and force a
+            # checkpoint-triggering fresh login. Keep the file; just fall
+            # through and let the operator decide.
+            print(f"[!] Saved session check failed ({e}).")
+            if not username or not password:
+                raise RuntimeError(
+                    "Saved session is not usable right now and no "
+                    "username/password is set for fallback. This is usually a "
+                    "temporary rate-limit/checkpoint — wait a few hours and "
+                    "retry, or regenerate session.json with make_session.py. "
+                    "session.json was left intact."
+                ) from e
+            print("[!] Attempting fresh login...")
+            cl = Client()
+            if device_settings:
+                # Reuse the old device/uuids, drop only the dead auth tokens.
+                cl.set_settings(device_settings)
+                cl.set_uuids(device_settings.get("uuids", {}))
+
+    if not username or not password:
+        raise RuntimeError(
+            "No usable saved session found. Set IG_USERNAME and IG_PASSWORD env vars, "
+            "or provide a local config.json for fallback login."
+        )
+
+    try:
+        cl.login(username, password)
+    except Exception as e:
+        raise RuntimeError(
+            f"Fresh login failed: {e}\n"
+            "If this is a challenge_required/checkpoint, open the Instagram "
+            "app on a trusted device, confirm the login, then re-run locally "
+            "from your home IP to regenerate session.json."
+        ) from e
     cl.dump_settings(session_file)
     print("[*] Logged in and session saved.")
     return cl
@@ -177,14 +238,52 @@ def prepare_video(src: Path) -> Path:
     return out
 
 
+def generate_thumbnail(video_path: Path) -> Path:
+    import subprocess
+
+    TEMP_DIR.mkdir(exist_ok=True)
+    thumb = TEMP_DIR / f"{video_path.stem}.jpg"
+    if thumb.exists():
+        thumb.unlink()
+
+    ffmpeg = get_ffmpeg()
+    cmd = [
+        ffmpeg, "-y",
+        "-ss", "00:00:01",
+        "-i", str(video_path),
+        "-frames:v", "1",
+        "-vf", "scale=1080:-2",
+        str(thumb),
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0 or not thumb.exists():
+        raise RuntimeError(f"Thumbnail generation failed:\n{result.stderr[-600:]}")
+
+    print(f"[*] Thumbnail ready: {thumb.name}")
+    return thumb
+
+
 # ── Queue ─────────────────────────────────────────────────────────────────────
 
 def pending_videos() -> list[Path]:
-    if not PENDING_DIR.exists():
-        return []
+    """Collect un-posted videos from posts/pending/ and downloads/<category>/."""
+    candidates: list[Path] = []
+
+    if PENDING_DIR.exists():
+        candidates.extend(
+            f for f in PENDING_DIR.iterdir() if f.suffix.lower() in VIDEO_EXTS
+        )
+
+    if DOWNLOADS_DIR.exists():
+        candidates.extend(
+            f for f in DOWNLOADS_DIR.rglob("*")
+            # skip the "*_ig.mp4" intermediates produced by the scraper
+            if f.suffix.lower() in VIDEO_EXTS and not f.stem.endswith("_ig")
+        )
+
     return sorted(
-        f for f in PENDING_DIR.iterdir()
-        if f.suffix.lower() in VIDEO_EXTS and not already_posted(f.name)
+        (f for f in candidates if not already_posted(f.name)),
+        key=lambda f: f.name,
     )
 
 
@@ -202,13 +301,15 @@ def post_video(cl, media_path: Path):
     category = media_path.parent.name if media_path.parent != PENDING_DIR else "pending"
     caption  = generate_caption(media_path.name, category)
     ready    = prepare_video(media_path)
+    thumb    = generate_thumbnail(ready)
     try:
         print(f"[*] Uploading: {media_path.name}")
-        media = cl.clip_upload(ready, caption=caption)
+        media = cl.clip_upload(ready, caption=caption, thumbnail=thumb)
         mark_as_posted(media_path.name)
         print(f"[+] Posted! https://www.instagram.com/p/{media.code}/")
     finally:
         ready.unlink(missing_ok=True)
+        thumb.unlink(missing_ok=True)
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
@@ -221,8 +322,12 @@ def run():
         print("[~] No videos in posts/pending/ — nothing to post this slot.")
         sys.exit(0)
 
-    username, password = get_credentials()
+    if not wait_for_network():
+        print("[!] No network after retries — aborting this run.")
+        sys.exit(1)
+
     print("[*] Logging into Instagram...")
+    username, password = get_credentials()
     cl = login(username, password)
     print("[*] Ready.\n")
 
